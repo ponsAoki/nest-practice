@@ -1,5 +1,4 @@
-import { Injectable, NestMiddleware } from "@nestjs/common";
-import { NextFunction } from "express";
+import { NextFunction } from 'express';
 
 //クラスで書くバージョン
 // @Injectable()
@@ -12,6 +11,6 @@ import { NextFunction } from "express";
 
 //関数で書くバージョン
 export const logger = (req: Request, res: Response, next: NextFunction) => {
-    console.log("request...");
-    next()
-}
+  console.log('request...');
+  next();
+};
