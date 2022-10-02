@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './interfaces/user.interface';
@@ -7,16 +8,23 @@ import { User } from './interfaces/user.interface';
 @Injectable()
 export class UsersService {
   constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
-  users: CreateUserDto[] = [];
+  // users: CreateUserDto[] = [];
   async create(user: CreateUserDto) {
     const createdUser = new this.userModel({
       username: user.username,
-      password: user.password,
+      password: await bcrypt.hash(user.password, 12),
     });
-    return createdUser.save();
+    return await createdUser.save();
   }
 
-  findAll(): CreateUserDto[] {
-    return this.users;
+  async findAll() {
+    return await this.userModel.find();
+    // return this.users;
+  }
+
+  async findOne(username: string) {
+    const user = await this.userModel.findOne({ username }).exec();
+    if (!user) throw new NotFoundException('Could not find user');
+    return user;
   }
 }
