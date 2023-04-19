@@ -1,30 +1,32 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import * as bcrypt from 'bcryptjs';
-import { Model } from 'mongoose';
-import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './interfaces/user.interface';
+import { Injectable } from '@nestjs/common';
+import { PrismaPromise, User } from '@prisma/client';
+import { PrismaService } from 'src/prisma.service';
+import { CreateUserInput } from './dto/create-user.input';
+import { UpdateUserInput } from './dto/update-user.input';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
-  // users: CreateUserDto[] = [];
-  async create(user: CreateUserDto) {
-    const createdUser = new this.userModel({
-      username: user.username,
-      password: await bcrypt.hash(user.password, 12),
+  constructor(private prismaService: PrismaService) {}
+  async create(user: CreateUserInput): Promise<User> {
+    return await this.prismaService.user.create({
+      data: user,
     });
-    return await createdUser.save();
   }
 
-  async findAll() {
-    return await this.userModel.find();
-    // return this.users;
+  findAll(): PrismaPromise<User[]> {
+    return this.prismaService.user.findMany();
   }
 
-  async findOne(username: string) {
-    const user = await this.userModel.findOne({ username }).exec();
-    if (!user) throw new NotFoundException('Could not find user');
-    return user;
+  updateById(id: string, data: UpdateUserInput): PrismaPromise<User> {
+    return this.prismaService.user.update({
+      where: { id },
+      data,
+    });
+  }
+
+  deleteById(id: string): PrismaPromise<User> {
+    return this.prismaService.user.delete({
+      where: { id },
+    });
   }
 }

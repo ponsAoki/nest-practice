@@ -5,25 +5,11 @@ import { CatsController } from './cats/cat.controller';
 import { CatsModule } from './cats/cats.module';
 import { logger } from './logger.middleware';
 // import { LoggerMiddleWare } from './logger.middleware';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot(),
-    CatsModule,
-    UsersModule,
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (config: ConfigService) => ({
-        uri: config.get<string>('MONGO_URI'),
-      }),
-    }),
-    AuthModule,
-  ],
+  imports: [ConfigModule.forRoot(), CatsModule, UsersModule],
   controllers: [AppController],
   providers: [AppService],
 })
